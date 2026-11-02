@@ -1,0 +1,25 @@
+# 依赖
+node_modules/
+
+# 旧版本备份（含已修复的缺陷，不对外发布）
+*.bak
+*.user.js.bak
+
+# 本地一次性探针与调试封装（含浏览器数据路径，禁止提交）
+probe_hist.py
+extract.py
+extract2.py
+bskeval.sh
+bskrun.sh
+_hist_copy.db
+_ck_copy.db
+*.html.tmp
+
+# 调试产物
+telemetry.log
+mock/mock_result.png
+
+# 系统
+Thumbs.db
+.DS_Store
+desktop.ini

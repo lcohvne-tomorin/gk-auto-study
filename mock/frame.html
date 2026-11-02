@@ -1,0 +1,41 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>mock frame</title>
+<style>body{margin:0;font:13px/1.5 sans-serif}#mainIframe{width:100%;height:420px;border:0}
+#viewBox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9}
+#viewBox iframe{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:640px;height:360px;background:#fff;border:0}</style>
+</head><body>
+<iframe id="mainIframe"></iframe>
+<div id="viewBox"><iframe id="ExamView"></iframe></div>
+<script>
+var search = location.search || '';
+var params = new URLSearchParams(search);
+
+/* 每轮测试从干净的服务端进度开始；fresh 只在本页处理，不往子页面透传 */
+if (params.get('fresh') === '1') {
+  Object.keys(localStorage).forEach(function (k) {
+    if (k.indexOf('gkmock_saved_') === 0) localStorage.removeItem(k);
+  });
+  params.delete('fresh');
+  search = params.toString() ? '?' + params.toString() : '';
+}
+
+/* 把查询参数透给课程表，方便用不同数据跑多组用例 */
+var q = search.replace(/^[?]/, '');
+document.getElementById('mainIframe').src = 'list.html?page=2' + (q ? '&' + q : '');
+
+window.showframe = function (name, url) {
+  var vb = document.getElementById('viewBox');
+  var f = document.getElementById('ExamView');
+  var id = (String(url).match(/Id=(\d+)/) || [])[1] || '';
+  var extra = '';
+  if (params.get('rep')) extra += '&rep=' + params.get('rep');
+  if (params.get('norep')) extra += '&norep=1';
+  if (params.get('video')) extra += '&video=1';
+  /* v=stale 用例：让 1.2 带上「已学满」的服务端进度 */
+  if (/v=stale/.test(search) && id === '102') extra += '&base=45';
+  vb.style.display = 'block';
+  f.src = 'player.html?Id=' + id + extra;
+};
+window.easyDialog = { close: function () { document.getElementById('viewBox').style.display = 'none'; } };
+</script>
+</body></html>

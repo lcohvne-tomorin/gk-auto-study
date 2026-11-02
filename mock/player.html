@@ -1,0 +1,91 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>mock player</title></head>
+<body>
+<div>此次学习 <span id="t">0</span> 秒</div>
+<input type="hidden" id="hidStudyTime" value="0">
+<input type="hidden" id="hidPassLine" value="1">
+<input type="hidden" id="hidRefId" value="102">
+<script>
+/* 模仿站点播放页：
+ *   player.on('play') → myload() 起一条 1 秒链，m_time 每秒 +1
+ *   m_time % reportEvery == 0 时「上报」
+ *
+ * 真站点是动态追加 <script src="updateTime.ashx?pTime=...">，请求挂在播放页
+ * 这个 document 上；一旦 ExamView.src 被换成 about:blank，请求立刻 abort。
+ * 这里用「延迟 2 秒写 localStorage」来还原：iframe 一卸载，pending 的
+ * setTimeout 就被一起清掉，写入不会发生。
+ *
+ * 参数：
+ *   ?rep=3     上报周期（真实站点 60）
+ *   ?norep=1   完全不上报（模拟服务端始终收不到）
+ *   ?base=45   服务端已有的学时（分钟）
+ */
+var m_time = 0, playFlag = false, timeCount = 0, timer = null, startTime = 0;
+
+var qs = new URLSearchParams(location.search);
+var curId = Number(qs.get('Id') || 0);
+var baseMin = Number(qs.get('base') || 0);
+var norep = qs.get('norep') === '1';
+window.reportEvery = Number(qs.get('rep') || 60) || 60;
+
+document.getElementById('hidStudyTime').value = baseMin;
+document.getElementById('hidRefId').value = curId;
+
+/* ?video=1 时插一个真实 <video> 元素：模拟站点播放器带原生 video 的情形
+ * （脚本的续播判断会走 video.paused 这条分支，而不是「读不到 video」） */
+if (qs.get('video') === '1') {
+  var v = document.createElement('video');
+  v.muted = true;
+  v.setAttribute('playsinline', '');
+  v.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0';
+  document.body.appendChild(v);
+}
+
+var SAVE_KEY = 'gkmock_saved_' + curId;
+
+function savedSec() {
+  return Number(localStorage.getItem(SAVE_KEY) || 0) || 0;
+}
+
+function report() {
+  if (norep) return;
+  var val = m_time;
+  /* 拖 2 秒再落盘，模拟请求飞一趟服务端；iframe 被换掉时这个定时器会被清掉 */
+  setTimeout(function () {
+    var cur = savedSec();
+    if (val > cur) localStorage.setItem(SAVE_KEY, String(val));
+    console.log('[mock] report id=' + curId + ' m_time=' + val);
+  }, 2000);
+}
+
+function startclock() {
+  timeCount++;
+  var offset = Date.now() - (startTime + timeCount * 1000);
+  var nextTime = 1000 - offset;
+  if (nextTime < 0) nextTime = 0;
+  m_time++;
+  document.getElementById('t').textContent = m_time;
+  if (m_time % window.reportEvery === 0) report();
+  if (playFlag) timer = setTimeout(startclock, nextTime);
+}
+
+function myload() {
+  if (playFlag) return;
+  playFlag = true;
+  startTime = Date.now();
+  timeCount = 0;
+  startclock();
+}
+
+function stopLoop() {
+  playFlag = false;
+  if (timer) { clearTimeout(timer); timer = null; }
+}
+
+var player = {
+  play: function () { myload(); },
+  pause: function () { stopLoop(); },
+  mute: function () { }
+};
+</script>
+</body></html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>mock list</title>
+<style>body{font:13px/1.6 sans-serif;margin:12px}table{border-collapse:collapse;width:100%}
+td,th{border:1px solid #ccc;padding:4px 6px;text-align:left}
+.page{margin-top:8px}.fright ul{list-style:none;padding:0;margin:0;display:flex;gap:10px}</style>
+</head><body>
+<table id="tab">
+  <tr>
+    <th>课程名称</th><th>所属分类</th><th>学时要求</th><th>已完成学时</th><th>状态</th><th>开始学习</th><th>课后练习</th>
+  </tr>
+  <tbody id="rows"></tbody>
+</table>
+<div class="page"><div class="fright"><ul id="pager"></ul></div></div>
+<script>
+var qs = new URLSearchParams(location.search);
+var page = Number(qs.get('page') || 1);
+var noid = qs.get('noid') === '1';
+var allDone = qs.get('v') === 'done';
+var TOTAL = 2;
+
+/* 时长统一用「秒」存，渲染时再转成「N分钟 / N秒」——脚本的 parseSeconds 两种都认 */
+var DATA = {
+  1: [
+    { n: '1.3 国防动员', req: 2700, got: 1200, st: '学习中', id: 103 },
+    { n: '1.1 国防建设', req: 2700, got: 2700, st: '已完成', id: 101 },
+    { n: '1.2 武装力量', req: 2700, got: 0, st: '未学习', id: 102 }
+  ],
+  2: [
+    { n: '2.1 国家安全概述', req: 60, got: 0, st: '未学习', id: 201 },
+    { n: '2.2 国家安全形势', req: 60, got: 0, st: '未学习', id: 202 }
+  ]
+};
+
+if (allDone) DATA[1].forEach(function (c) { c.st = '已完成'; c.got = c.req; });
+
+/* 学时已够但状态仍挂「学习中」：验证脚本不会反复开关同一节 */
+if (qs.get('v') === 'stale') {
+  DATA[1].forEach(function (c) {
+    if (c.id === 102) { c.st = '学习中'; c.got = c.req; c.forceSt = '学习中'; }
+  });
+}
+
+/* 秒级场景：把 1.2 的门槛压到几秒，方便回归「达标→上报→切下一节」整条链路 */
+if (qs.get('tiny')) {
+  var tinyReq = Number(qs.get('req') || 6);
+  DATA[1].forEach(function (c) {
+    if (c.id === 102) { c.req = tinyReq; c.got = 0; c.st = '未学习'; c.forceSt = ''; }
+  });
+}
+
+function fmtDur(sec) {
+  if (sec < 60) return sec + '秒';
+  return Math.round(sec / 60) + '分钟';
+}
+
+/* 服务端已保存的本次学时：player.html 在整点上报时写这个键 */
+function savedSecOf(id) {
+  return Number(localStorage.getItem('gkmock_saved_' + id) || 0) || 0;
+}
+
+var rows = document.getElementById('rows');
+DATA[page].forEach(function (c) {
+  var got = c.got + savedSecOf(c.id);
+  var st = c.forceSt || c.st;
+  if (!c.forceSt && st !== '已完成' && c.req > 0 && got >= c.req) st = '已完成';
+  if (!c.forceSt && st === '未学习' && got > 0 && !(c.req > 0 && got >= c.req)) st = '学习中';
+
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td>' + c.n + '</td><td>军事理论</td><td>' + fmtDur(c.req) + '</td><td>' +
+    fmtDur(got) + '</td><td>' + st + '</td>' +
+    '<td><a href="javascript:;" onclick="showframe(\'' + c.n + '\',' + c.id + ')">开始学习</a></td>' +
+    '<td><a href="javascript:;">参加练习</a></td>';
+  rows.appendChild(tr);
+});
+
+var pager = document.getElementById('pager');
+pager.innerHTML = '<li>' + page + '/' + TOTAL + '</li>' +
+  '<li><a href="javascript:;"' + (noid ? '' : ' id="PageSplit1_BtnPrev"') + '>上一页</a></li>' +
+  '<li><a href="javascript:;" id="PageSplit1_BtnNext">下一页</a></li>';
+
+pager.querySelectorAll('a').forEach(function (a) {
+  var isPrev = /上一页/.test(a.textContent);
+  a.onclick = function () {
+    var to = isPrev ? page - 1 : page + 1;
+    if (to < 1 || to > TOTAL) return;
+    var params = new URLSearchParams(location.search);
+    params.set('page', to);
+    location.href = 'list.html?' + params.toString();
+  };
+});
+</script>
+</body></html>

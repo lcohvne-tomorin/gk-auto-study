@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>高校考试网 自动刷课助手 · 安装</title>
+<meta name="description" content="高校考试网（gaoxiaokaoshi.com）视频学时自动完成脚本。按章节顺序自动选课、静音播放、达标后先存进度再切下一节、自动翻页，切到后台也能计时。">
+<style>
+  :root{
+    --bg:#0d1117; --bg2:#11161d; --card:#161b22; --line:#262d36;
+    --fg:#e6edf3; --fg2:#9aa4b2; --fg3:#6e7681;
+    --accent:#2f81f7; --ok:#3fb950; --warn:#d29922; --danger:#f85149;
+    --shadow:0 18px 48px rgba(0,0,0,.45);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f8fa; --bg2:#ffffff; --card:#ffffff; --line:#d8dee4;
+      --fg:#1f2328; --fg2:#59636e; --fg3:#818b98;
+      --accent:#0969da; --ok:#1a7f37; --warn:#9a6700; --danger:#cf222e;
+      --shadow:0 14px 34px rgba(31,35,40,.10);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--fg);
+    font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .glow{
+    position:fixed; inset:-20% -10% auto -10%; height:520px; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(560px 300px at 22% 30%, rgba(47,129,247,.20), transparent 68%),
+      radial-gradient(520px 280px at 78% 10%, rgba(63,185,80,.14), transparent 70%);
+    filter:blur(6px);
+  }
+  .wrap{position:relative; z-index:1; max-width:800px; margin:0 auto; padding:56px 22px 72px}
+
+  header{text-align:center; margin-bottom:38px}
+  .badge{
+    display:inline-flex; align-items:center; gap:7px; padding:5px 13px; border-radius:999px;
+    border:1px solid var(--line); background:var(--card); color:var(--fg2); font-size:12.5px;
+    font-variant-numeric:tabular-nums;
+  }
+  .badge b{color:var(--fg)}
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  h1{
+    margin:18px 0 10px; font-size:clamp(27px,4.6vw,40px); line-height:1.25; letter-spacing:-.02em;
+    font-weight:700;
+  }
+  h1 span{
+    background:linear-gradient(92deg,var(--accent),var(--ok));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub{margin:0 auto; max-width:560px; color:var(--fg2); font-size:15.5px}
+
+  .cta{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin:28px 0 14px}
+  a.btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:9px;
+    min-width:186px; padding:13px 24px; border-radius:10px; text-decoration:none;
+    font-size:15px; font-weight:600; border:1px solid transparent; transition:.16s ease;
+  }
+  a.primary{
+    background:linear-gradient(180deg,#3b8ef8,#1f6feb); color:#fff;
+    box-shadow:0 8px 22px rgba(31,111,235,.34);
+  }
+  a.primary:hover{transform:translateY(-1px); box-shadow:0 12px 26px rgba(31,111,235,.42)}
+  a.ghost{background:var(--card); color:var(--fg); border-color:var(--line)}
+  a.ghost:hover{border-color:var(--accent); color:var(--accent)}
+  .hint{text-align:center; color:var(--fg3); font-size:12.8px; margin-top:2px}
+  .hint code{background:var(--bg2); border:1px solid var(--line); border-radius:5px; padding:1px 5px; font-size:12px}
+
+  .steps{
+    margin:34px 0 0; border:1px solid var(--line); border-radius:14px; background:var(--card);
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .steps h2{
+    margin:0; padding:15px 20px; font-size:14px; font-weight:600; color:var(--fg2);
+    border-bottom:1px solid var(--line); background:var(--bg2); letter-spacing:.02em;
+  }
+  ol{margin:0; padding:6px 0; list-style:none; counter-reset:s}
+  ol li{
+    counter-increment:s; position:relative; padding:11px 20px 11px 52px; color:var(--fg2); font-size:14px;
+  }
+  ol li::before{
+    content:counter(s); position:absolute; left:20px; top:12px;
+    width:21px;height:21px;border-radius:50%; background:rgba(47,129,247,.14); color:var(--accent);
+    font-size:12px; font-weight:700; line-height:21px; text-align:center;
+  }
+  ol li b{color:var(--fg); font-weight:600}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(228px,1fr)); gap:12px; margin-top:34px}
+  .card{
+    border:1px solid var(--line); border-radius:12px; background:var(--card); padding:15px 16px;
+  }
+  .card .t{font-weight:600; font-size:14.2px; margin-bottom:5px; display:flex; align-items:center; gap:7px}
+  .card .t i{width:6px;height:6px;border-radius:50%;background:var(--accent); display:inline-block; flex:0 0 auto}
+  .card .d{color:var(--fg2); font-size:13.2px; line-height:1.65}
+
+  .note{
+    margin-top:26px; padding:15px 17px; border-radius:12px; font-size:13.2px; line-height:1.7;
+    border:1px solid rgba(210,153,34,.34); background:rgba(210,153,34,.08); color:var(--fg2);
+  }
+  .note b{color:var(--warn)}
+  .note p{margin:0 0 6px}
+  .note p:last-child{margin:0}
+
+  .privacy{
+    margin-top:12px; padding:15px 17px; border-radius:12px; font-size:13.2px; line-height:1.7;
+    border:1px solid rgba(63,185,80,.28); background:rgba(63,185,80,.07); color:var(--fg2);
+  }
+  .privacy b{color:var(--ok)}
+
+  footer{
+    margin-top:40px; padding-top:20px; border-top:1px solid var(--line);
+    display:flex; flex-wrap:wrap; gap:16px; justify-content:center; color:var(--fg3); font-size:12.6px;
+  }
+  footer a{color:var(--fg2); text-decoration:none}
+  footer a:hover{color:var(--accent)}
+  .copy{
+    background:none; border:1px solid var(--line); color:var(--fg2); border-radius:7px;
+    padding:3px 9px; font-size:12px; cursor:pointer; font-family:inherit;
+  }
+  .copy:hover{color:var(--accent); border-color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+
+  <header>
+    <div class="badge"><span class="dot"></span>v<b id="ver">1.6.0</b> · <span id="size">单文件</span> · MIT</div>
+    <h1>高校考试网<br><span>自动刷课助手</span></h1>
+    <p class="sub">按章节顺序自动选课、静音播放、学时达标后先把进度存住再切下一节，自动翻页。切到后台、最小化，照样计时。</p>
+
+    <div class="cta">
+      <a class="btn primary" id="install" href="gk-auto-study.user.js">安装脚本</a>
+      <a class="btn ghost" id="tm" href="https://www.tampermonkey.net/" target="_blank" rel="noopener">先装 Tampermonkey</a>
+    </div>
+    <p class="hint">点击「安装脚本」后，油猴会弹出安装页。若只看到一堆代码，说明还没装 Tampermonkey。</p>
+  </header>
+
+  <section class="steps">
+    <h2>安装步骤</h2>
+    <ol>
+      <li>给浏览器装 <b>Tampermonkey</b>（油猴）扩展，Chrome / Edge / Firefox 均有。</li>
+      <li>回到本页，点 <b>安装脚本</b>，在弹出页点「安装」。</li>
+      <li>打开 <b>高校考试网 → 我的课程</b>，右下角会出现控制面板，自动开始。</li>
+    </ol>
+  </section>
+
+  <div class="grid">
+    <div class="card">
+      <div class="t"><i></i>按章节顺序选课</div>
+      <div class="d">每次刷新先退回第 1 页，从 1.1 起找第一个状态不是「已完成」的课。数字排序，1.9 排在 1.10 前面。</div>
+    </div>
+    <div class="card">
+      <div class="t"><i></i>达标先存进度</div>
+      <div class="d">学时够了不立刻关窗口——先等站点的进度上报落地，再切下一节。不会出现「刷完又从头刷一遍」。</div>
+    </div>
+    <div class="card">
+      <div class="t"><i></i>后台继续计时</div>
+      <div class="d">切标签页、最小化、锁屏都不停。四层伪装 + 按真实秒数补偿，补的时间恒等于真实经过时间。</div>
+    </div>
+    <div class="card">
+      <div class="t"><i></i>自动翻页</div>
+      <div class="d">本页全部完成自动翻下一页，翻页后仍按章节号取第一个未完成的。</div>
+    </div>
+    <div class="card">
+      <div class="t"><i></i>防卡死</div>
+      <div class="d">计时不动就重开播放器；学时够了但站点不认，先等结算、再重刷确认，最多两次就跳过，不死磕一节。</div>
+    </div>
+    <div class="card">
+      <div class="t"><i></i>面板可控</div>
+      <div class="d">右下角面板：暂停、跳过、前台伪装开关、诊断信息、清空记录。</div>
+    </div>
+  </div>
+
+  <div class="privacy">
+    <p><b>不上传任何数据。</b>脚本是单文件、<code>@grant none</code>、不引用任何外部库，不联网、不读账号密码、不写 Cookie，所有状态只存在你自己浏览器的 localStorage 里。</p>
+  </div>
+
+  <div class="note">
+    <p><b>使用前请知悉</b></p>
+    <p>脚本会代替你保持播放状态，这与站点的用户协议存在冲突，账号风险由使用者自行承担。它不会伪造学习记录——补出的秒数恒等于真实挂机时间，只是把「切到后台就停表」改回「照常计时」。</p>
+    <p>请勿用于商业转售，也请勿同时挂多个账号。站点改版可能导致脚本暂时失效，更新见仓库 <a href="https://github.com/lcohvne-tomorin/gk-auto-study/releases" target="_blank" rel="noopener" style="color:var(--accent)">Releases</a>。</p>
+  </div>
+
+  <footer>
+    <a href="https://github.com/lcohvne-tomorin/gk-auto-study" target="_blank" rel="noopener">GitHub 仓库</a>
+    <a href="https://github.com/lcohvne-tomorin/gk-auto-study/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新日志</a>
+    <a href="https://github.com/lcohvne-tomorin/gk-auto-study/issues" target="_blank" rel="noopener">问题反馈</a>
+    <span>安装链接 <button class="copy" id="copybtn" type="button">复制</button></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // 版本与体积直接从脚本文件读，避免页面和脚本版本脱节
+  fetch('gk-auto-study.user.js', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.text() : ''; })
+    .then(function (t) {
+      if (!t) return;
+      var m = t.match(/\/\/\s*@version\s+([\d.]+)/);
+      if (m) document.getElementById('ver').textContent = m[1];
+      var kb = Math.round(new Blob([t]).size / 1024);
+      document.getElementById('size').textContent = kb + ' KB';
+    })
+    .catch(function () { /* 本地 file:// 打开时会失败，用默认文案 */ });
+
+  // 按用户浏览器给最合适的扩展商店
+  var ua = navigator.userAgent;
+  var tm = document.getElementById('tm');
+  if (/Edg\//.test(ua)) {
+    tm.href = 'https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd';
+    tm.textContent = '安装 Tampermonkey（Edge）';
+  } else if (/Firefox\//.test(ua)) {
+    tm.href = 'https://addons.mozilla.org/firefox/addon/tampermonkey/';
+    tm.textContent = '安装 Tampermonkey（Firefox）';
+  } else if (/Chrome\//.test(ua)) {
+    tm.href = 'https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo';
+    tm.textContent = '安装 Tampermonkey（Chrome）';
+  }
+
+  // 一键复制安装直链，方便群里转发
+  document.getElementById('copybtn').addEventListener('click', function () {
+    var url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'gk-auto-study.user.js';
+    var btn = this;
+    var done = function () { btn.textContent = '已复制'; setTimeout(function () { btn.textContent = '复制'; }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done, function () { window.prompt('手动复制：', url); });
+    } else {
+      window.prompt('手动复制：', url);
+    }
+  });
+})();
+</script>
+</body>
+</html>
