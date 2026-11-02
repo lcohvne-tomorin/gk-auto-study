@@ -2,14 +2,14 @@
 
 高校考试网（gaoxiaokaoshi.com）视频学时自动完成脚本。按章节顺序自动选课、静音播放、学时达标后先存进度再切下一节，自动翻页；切到后台、最小化，照样计时。
 
-**当前版本 1.6.0** · [一键安装](https://lcohvne-tomorin.github.io/gk-auto-study/) · [更新日志](./CHANGELOG.md) · [问题反馈](https://github.com/lcohvne-tomorin/gk-auto-study/issues)
+**当前版本 1.6.0** · [立即安装](https://github.com/lcohvne-tomorin/gk-auto-study/raw/main/gk-auto-study.user.js) · [更新日志](./CHANGELOG.md) · [问题反馈](https://github.com/lcohvne-tomorin/gk-auto-study/issues)
 
 ## 安装
 
 | 方式 | 操作 |
 |---|---|
-| 推荐 | 打开[安装页](https://lcohvne-tomorin.github.io/gk-auto-study/)，点「安装脚本」 |
-| 直链 | 浏览器访问 [`gk-auto-study.user.js`](https://raw.githubusercontent.com/lcohvne-tomorin/gk-auto-study/main/gk-auto-study.user.js)，Tampermonkey 会自动接管 |
+| 推荐 | 浏览器打开 [gk-auto-study.user.js](https://github.com/lcohvne-tomorin/gk-auto-study/raw/main/gk-auto-study.user.js)，Tampermonkey 会自动弹出安装页 |
+| 图文步骤 | 打开[安装页](https://lcohvne-tomorin.github.io/gk-auto-study/)，点「安装脚本」 |
 | 手动 | Tampermonkey → 新建脚本 → 全选替换 → 保存 |
 
 前置条件：浏览器装好 Tampermonkey（Chrome / Edge / Firefox）。装完打开 **我的课程** 页，右下角出现控制面板即生效。
