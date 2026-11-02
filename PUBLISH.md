@@ -44,15 +44,47 @@ tampermonkey  userscript  greasemonkey  auto-study  gaoxiaokaoshi  video-course 
 
 ## 三、GreasyFork 提交
 
-地址：https://greasyfork.org/zh-CN/scripts/new
+提交地址：https://greasyfork.org/zh-CN/scripts/new （用 GitHub 账号 OAuth 登录）
+
+### 能不能发：能
+
+GreasyFork 的[脚本规则](https://greasyfork.org/help/code-rules)通篇没有「违反目标站点服务条款即删除」或「站长投诉即下架」的条款，
+规定的都是**平台自身**的内容要求：功能与描述一致、代码不混淆、不堆关键词、不侵权、不重复投稿、大小 ≤ 2MB。
+
+站内已有先例，且活得很好：
+
+| 脚本 | 作者 | 创建 | 最后更新 | 总安装 | 大小 | 状态 |
+|---|---|---|---|---|---|---|
+| [GaoXiaoKaoShi高校考试网自动刷视频](https://greasyfork.org/zh-CN/scripts/463301) | AliubYiero | 2023-04-05 | 2023-04-07 | **1,022** | 12.5 KB | 在架，无违规标记 |
+| [高校考试网小助手](https://greasyfork.org/zh-CN/scripts/558034) | EchoPing07 | 2025-12-05 | 2025-12-05 | 26 | 49.9 KB | 在架 |
+
+**这两个数字也说明了需求天花板**：最早那个脚本活了三年半、日安装归零，累计 1,022 次安装——
+这个站点的油猴用户存量大概就是四位数，且已被满足。别指望 GreasyFork 带来成千上万，
+它给的是「一个长期稳定、能自动更新的入口」，不是流量。
+
+### 合规自查（已过）
+
+| 规则 | 要求 | 本脚本 |
+|---|---|---|
+| 代码不得混淆/压缩 | 保留空白与变量名 | 平均行长 30.5，未压缩 ✅ |
+| 大小 | ≤ 2 MB | 62 KB ✅ |
+| 外部依赖 | 库应 `@require` | 零依赖 ✅ |
+| `@match` 范围 | 不得包含不提供功能的站点 | 仅 gaoxiaokaoshi.com 的 4 种协议/主机组合 ✅ |
+| 语言标注 | 名称/描述须标语言 | 有 `@name:zh-CN` / `@description:zh-CN` ✅ |
+| `@antifeature` | 追踪/广告/挖矿须披露 | 无 ✅ |
+| 重复投稿 | 不得重发站内已有脚本 | 独立实现，非 repost ✅ |
+| 关键词堆砌 | 不得堆无关关键词 | 标签全部相关 ✅ |
+
+### 填表
 
 | 字段 | 填什么 |
 |---|---|
 | 脚本名 | `高校考试网 自动刷课助手` |
 | 描述 | `自动完成「我的课程」视频任务：按章节顺序选课、静音播放、达标后先存进度再切下一节、自动翻页；切到后台也能计时。` |
 | 语言 | 中文（简体） |
-| 标签 | `高校考试网` `gaoxiaokaoshi` `自动播放` `学习` `油猴` |
-| 分类 | 其他（或「学习」） |
+| 标签 | `高校考试网` `gaoxiaokaoshi` `自动播放` `学习` `油猴` `自动翻页` |
+| 许可证 | MIT |
+| 脚本类型 | 普通脚本（非 library） |
 | 附加信息 | 见下方模板 |
 
 **附加信息模板**
@@ -62,7 +94,7 @@ tampermonkey  userscript  greasemonkey  auto-study  gaoxiaokaoshi  video-course 
 - 每次刷新从 1.1 起按章节顺序找第一个未完成的课
 - 学时达标后先等站点保存进度，再切下一节（不会刷完又从 0 开始）
 - 自动翻页；计时卡住自动重开
-- 切到后台 / 最小化 / 锁屏继续计时
+- 切到后台 / 最小化 / 锁屏继续计时（单个标签页即可，不需要多开）
 
 ## 使用
 装好脚本后打开「我的课程」页，右下角出现面板即生效。
@@ -76,9 +108,18 @@ tampermonkey  userscript  greasemonkey  auto-study  gaoxiaokaoshi  video-course 
 https://github.com/lcohvne-tomorin/gk-auto-study/issues
 ```
 
-**注意**：GreasyFork 会自动把 `@downloadURL` / `@updateURL` 改写成 `update.greasyfork.org`。
-所以 GreasyFork 上装的用户跟着 GreasyFork 更新，GitHub 上装的跟着 GitHub 更新——
-**两边版本号必须同步升**，否则会出现「一边能更新、一边停更」。
+### 三条必须注意
+
+1. **不要在描述里把站外链接写成「安装入口」。** 规则原文：
+   > Posting of alternate download URLs, with the intent of having users use the alternate sources instead of the version posted to Greasy Fork, is not allowed.
+
+   但「推广作者的代码仓库」是明确允许的（`Promotion of the script author's homepage, code repository... is allowed`），
+   所以 issue 链接、仓库链接可以放，别写「从这里下载更快」。
+2. **`@downloadURL` / `@updateURL` 会被 GreasyFork 自动改写**成 `update.greasyfork.org`。
+   于是两处并存：GreasyFork 装的跟 GreasyFork 更新，GitHub 装的跟 GitHub 更新——
+   **每次发布必须把两边版本号一起升**，否则会出现「一边能更新、一边永远停更」。
+3. **不要写成「基于 XXX 改进」**，除非真的基于对方代码。规则对重复投稿有限制，且这属于事实性描述，
+   写错了会被举报。我们的实现独立，如实写即可。
 
 ---
 
